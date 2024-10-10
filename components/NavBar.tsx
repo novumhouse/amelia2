@@ -55,9 +55,9 @@ const NavBar = () => {
               return (
                 <Link key={item.href} href={item.href}>
                   <li
-                    className={p-2 my-4 rounded-lg font-bold ${
+                    className={`p-2 my-4 rounded-lg font-bold ${
                       isActive ? "bg-[#18282a] text-[#63beb7]" : ""
-                    }}
+                    }`}
                   >
                     <item.icon className="h-5 w-5 inline-block mr-2" />
                     {item.label}
