@@ -17,38 +17,33 @@ import { useSession } from "next-auth/react";
 
 const NavBar = () => {
   const pathname = usePathname();
-  const session = useSession();
-  // @ts-ignore
-  const admin = session.data?.user?.admin;
+  const [navbarOpen, setNavbarOpen] = React.useState(false); // Dodanie stanu do kontrolowania widoczności navbaru
 
-  let navItems = [
+  const navItems = [
     { href: "/dashboard", icon: ViewIcon, label: "Overview" },
     { href: "/assistants", icon: ActivityIcon, label: "Assistants" },
-   /* { href: "/call-logs", icon: PhoneCallIcon, label: "Call Logs" },
-    { href: "/phone-numbers", icon: PhoneIcon, label: "Phone Numbers" },*/
     { href: "/billing", icon: DollarSignIcon, label: "Billing" },
     { href: "/support", icon: HeadsetIcon, label: "Support" },
   ];
 
-  if (admin) {
-    navItems = navItems.filter(
-      (item) =>
-        item.label !== "Assistants" &&
-        item.label !== "Call Logs" &&
-        item.label !== "Phone Numbers"
-    );
-    navItems.push({ href: "/admin", icon: UserIcon, label: "Admin" });
-  }
-
   return (
-    <div className="flex flex-col justify-between h-screen">
-      <div>
+    <div>
+      {/* Przycisk do otwierania navbaru na mniejszych ekranach */}
+      <button
+        className="text-white md:hidden" // Ukryj na większych ekranach
+        onClick={() => setNavbarOpen(!navbarOpen)}
+      >
+        <MenuIcon className="h-6 w-6" /> {/* Ikona menu (hamburger) */}
+      </button>
+
+      {/* Nawigacja - ukryj na małych ekranach, pokaż na większych */}
+      <div className={`fixed inset-y-0 left-0 w-64 bg-black text-white transform ${navbarOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-300 ease-in-out md:translate-x-0 md:block`}>
         <header className="text-white px-6 py-4 pb-0 flex items-center bg-[#0e0e0e]">
           <Link href={"/"}>
             <span className="text-2xl font-bold">Memory Walk</span>
           </Link>
         </header>
-        <aside className="flex text-white w-64 py-8 px-4">
+        <aside className="flex flex-col w-64 py-8 px-4">
           <ul className="space-y-4">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
@@ -67,10 +62,9 @@ const NavBar = () => {
             })}
           </ul>
         </aside>
-      </div>
-      <div className="flex items-center m-4 ">
-        {/* <UserIcon className="h-8 w-8 mr-2" /> */}
-        <LogInButton />
+        <div className="flex items-center m-4 ">
+          <LogInButton />
+        </div>
       </div>
     </div>
   );
