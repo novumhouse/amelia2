@@ -24,8 +24,8 @@ const NavBar = () => {
   let navItems = [
     { href: "/dashboard", icon: ViewIcon, label: "Overview" },
     { href: "/assistants", icon: ActivityIcon, label: "Assistants" },
-    { href: "/call-logs", icon: PhoneCallIcon, label: "Call Logs" },
-    { href: "/phone-numbers", icon: PhoneIcon, label: "Phone Numbers" },
+   /* { href: "/call-logs", icon: PhoneCallIcon, label: "Call Logs" },
+    { href: "/phone-numbers", icon: PhoneIcon, label: "Phone Numbers" },*/
     { href: "/billing", icon: DollarSignIcon, label: "Billing" },
     { href: "/support", icon: HeadsetIcon, label: "Support" },
   ];
