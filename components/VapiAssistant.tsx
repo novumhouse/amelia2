@@ -11,20 +11,26 @@ export default function VapiAssistant({ vapiId }: { vapiId: string }) {
   const vapi = new Vapi(publickey); // Get Public Token from Dashboard > Accounts Page
   const [callStatus, setCallStatus] = useState("inactive");
 
+  // Start call
   const start = async () => {
     try {
+      console.log("Starting call...");  // Debugging log
       setCallStatus("loading");
       await vapi.start(vapiId);
+      console.log("Call started");  // Debugging log
     } catch (error) {
       console.error("Error starting the call:", error);
       setCallStatus("inactive"); // Reset status if there's an error
     }
   };
 
+  // Stop call
   const stop = async () => {
     try {
+      console.log("Stopping call...");  // Debugging log
       setCallStatus("loading");
       await vapi.stop();
+      console.log("Call stopped");  // Debugging log
       setCallStatus("inactive");
     } catch (error) {
       console.error("Error stopping the call:", error);
@@ -32,10 +38,18 @@ export default function VapiAssistant({ vapiId }: { vapiId: string }) {
     }
   };
 
+  // Event listeners
   useEffect(() => {
-    vapi.on("call-start", () => setCallStatus("active"));
-    vapi.on("call-end", () => setCallStatus("inactive"));
+    vapi.on("call-start", () => {
+      console.log("call-start event triggered");  // Debugging log
+      setCallStatus("active");
+    });
+    vapi.on("call-end", () => {
+      console.log("call-end event triggered");  // Debugging log
+      setCallStatus("inactive");
+    });
 
+    // Cleanup event listeners on unmount
     return () => {
       vapi.removeAllListeners();
     };
@@ -43,30 +57,30 @@ export default function VapiAssistant({ vapiId }: { vapiId: string }) {
 
   return (
     <div>
-      {callStatus === "inactive" ? (
+      {callStatus === "inactive" && (
         <Button
           className="w-full bg-[#37aa9d3e] text-[#37aa9d] hover:bg-[#37aa9d47]"
           onClick={start}
         >
           Start
         </Button>
-      ) : null}
-      {callStatus === "loading" ? (
+      )}
+      {callStatus === "loading" && (
         <Button
           className="w-full bg-[#37aa9d3e] text-[#37aa9d] hover:text-[#37aa9d] hover:bg-[#37aa9d47]"
           variant={"outline"}
         >
           Loading...
         </Button>
-      ) : null}
-      {callStatus === "active" ? (
+      )}
+      {callStatus === "active" && (
         <Button
           className="w-full bg-[#37aa9d3e] text-[#37aa9d] hover:bg-[#37aa9d47]"
           onClick={stop}
         >
           Stop
         </Button>
-      ) : null}
+      )}
     </div>
   );
 }
