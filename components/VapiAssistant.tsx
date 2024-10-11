@@ -5,19 +5,33 @@ import { Button } from "./ui/button";
 import { useSession } from "next-auth/react";
 
 export default function VapiAssistant({ vapiId }: { vapiId: string }) {
-  const session  = useSession();
+  const session = useSession();
   //@ts-ignore
   const publickey = session?.data?.user?.public;
   const vapi = new Vapi(publickey); // Get Public Token from Dashboard > Accounts Page
   const [callStatus, setCallStatus] = useState("inactive");
+
   const start = async () => {
-    setCallStatus("loading");
-    const response = vapi.start(vapiId);
+    try {
+      setCallStatus("loading");
+      await vapi.start(vapiId);
+    } catch (error) {
+      console.error("Error starting the call:", error);
+      setCallStatus("inactive"); // Reset status if there's an error
+    }
   };
-  const stop = () => {
-    setCallStatus("loading");
-    vapi.stop();
+
+  const stop = async () => {
+    try {
+      setCallStatus("loading");
+      await vapi.stop();
+      setCallStatus("inactive");
+    } catch (error) {
+      console.error("Error stopping the call:", error);
+      setCallStatus("active"); // Keep it active if stop failed
+    }
   };
+
   useEffect(() => {
     vapi.on("call-start", () => setCallStatus("active"));
     vapi.on("call-end", () => setCallStatus("inactive"));
@@ -26,6 +40,7 @@ export default function VapiAssistant({ vapiId }: { vapiId: string }) {
       vapi.removeAllListeners();
     };
   }, [vapi]);
+
   return (
     <div>
       {callStatus === "inactive" ? (
