@@ -5,53 +5,88 @@ import { Button } from "./ui/button";
 import { useSession } from "next-auth/react";
 
 export default function VapiAssistant({ vapiId }: { vapiId: string }) {
-  const session  = useSession();
+  const session = useSession();
   //@ts-ignore
   const publickey = session?.data?.user?.public;
   const vapi = new Vapi(publickey); // Get Public Token from Dashboard > Accounts Page
   const [callStatus, setCallStatus] = useState("inactive");
-  const start = async () => {
-    setCallStatus("loading");
-    const response = vapi.start(vapiId);
-  };
-  const stop = () => {
-    setCallStatus("loading");
-    vapi.stop();
-  };
-  useEffect(() => {
-    vapi.on("call-start", () => setCallStatus("active"));
-    vapi.on("call-end", () => setCallStatus("inactive"));
 
+  // Start call
+  const start = async () => {
+    try {
+      console.log("Starting call...");  // Debugging log
+      setCallStatus("loading");
+      await vapi.start(vapiId);
+      console.log("Call started");  // Debugging log
+    } catch (error) {
+      console.error("Error starting the call:", error);
+      setCallStatus("inactive"); // Reset status if there's an error
+    }
+  };
+
+  // Stop call with a manual fallback
+  const stop = async () => {
+    try {
+      console.log("Stopping call...");  // Debugging log
+      setCallStatus("loading");
+      const stopResponse = await vapi.stop();
+      console.log("Stop response:", stopResponse);  // Log the response
+
+      // Timeout to force "inactive" state in case call-end event isn't fired
+      setTimeout(() => {
+        console.log("Forcing to inactive after timeout");
+        setCallStatus("inactive");
+      }, 3000); // 3-second timeout as a fallback
+
+    } catch (error) {
+      console.error("Error stopping the call:", error);
+      setCallStatus("active"); // Keep it active if stop failed
+    }
+  };
+
+  // Event listeners
+  useEffect(() => {
+    vapi.on("call-start", () => {
+      console.log("call-start event triggered");  // Debugging log
+      setCallStatus("active");
+    });
+    vapi.on("call-end", () => {
+      console.log("call-end event triggered");  // Debugging log
+      setCallStatus("inactive");
+    });
+
+    // Cleanup event listeners on unmount
     return () => {
       vapi.removeAllListeners();
     };
   }, [vapi]);
+
   return (
     <div>
-      {callStatus === "inactive" ? (
+      {callStatus === "inactive" && (
         <Button
           className="w-full bg-[#37aa9d3e] text-[#37aa9d] hover:bg-[#37aa9d47]"
           onClick={start}
         >
           Start
         </Button>
-      ) : null}
-      {callStatus === "loading" ? (
+      )}
+      {callStatus === "loading" && (
         <Button
           className="w-full bg-[#37aa9d3e] text-[#37aa9d] hover:text-[#37aa9d] hover:bg-[#37aa9d47]"
           variant={"outline"}
         >
           Loading...
         </Button>
-      ) : null}
-      {callStatus === "active" ? (
+      )}
+      {callStatus === "active" && (
         <Button
           className="w-full bg-[#37aa9d3e] text-[#37aa9d] hover:bg-[#37aa9d47]"
           onClick={stop}
         >
           Stop
         </Button>
-      ) : null}
+      )}
     </div>
   );
 }
